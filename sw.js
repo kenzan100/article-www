@@ -1,2 +1,217 @@
-!function(){"use strict";self.CACHE_BUSTER="1571021632977|0.6352849838042347",self.addEventListener("install",function(e){return self.skipWaiting()}),self.addEventListener("activate",function(e){return self.clients.claim()});var e=function(e,t){return caches.keys().then(function(n){n.forEach(function(n){0===n.indexOf(e)&&n!==t&&caches.delete(n)})})},t="".concat("esw-asset-cache","-").concat("1"),n=["assets/article-ember-d41d8cd98f00b204e9800998ecf8427e.css","assets/article-ember-a50634983e3cc0f3fe563cbff0d61b43.js","assets/auto-import-fastboot-3aa79ad5e7796a03aff9969d426c72bd.js","assets/chunk.00f0caa70e26a8cd7762.js","assets/chunk.16e51fe0914688f617f0.js","assets/chunk.2383f36cd84339a868b4.js","assets/chunk.27c0c95bfd8b3f61a20a.js","assets/chunk.3b89ee1d866560991c7a.js","assets/chunk.47ae045ed68815c09635.js","assets/chunk.8805073c370ed70f86a7.js","assets/chunk.b9e3643012ed581041f9.js","assets/chunk.d2262caa79f820477d8f.js","assets/chunk.d250521b4cbd0a0390ae.js","assets/vendor-d41d8cd98f00b204e9800998ecf8427e.css","assets/vendor-35d5fa586f2450da1106f4a5c42ba47b.js"].map(function(e){return new URL(e,self.location).toString()});self.addEventListener("install",function(e){e.waitUntil(caches.open(t).then(function(e){return Promise.all(n.map(function(t){var n=new Request(t,{mode:"cors"});return fetch(n).then(function(n){if(n.status>=400){var c=new Error("Request for ".concat(t," failed with status ").concat(n.statusText));throw c}return e.put(t,n)}).catch(function(e){console.error("Not caching ".concat(t," due to ").concat(e))})}))}))}),self.addEventListener("activate",function(c){c.waitUntil(Promise.all([e("esw-asset-cache",t),void caches.open(t).then(function(e){return e.keys().then(function(t){t.forEach(function(t){-1===n.indexOf(t.url)&&e.delete(t)})})})]))}),self.addEventListener("fetch",function(e){var c="GET"===e.request.method,s=-1!==n.indexOf(e.request.url);c&&s&&e.respondWith(caches.match(e.request,{cacheName:t}).then(function(t){return t||fetch(e.request.url,{mode:"cors"})}))});function c(e,t){return!!t.find(function(t){return t.test(decodeURI(e))})}var s="".concat("esw-cache-fallback","-").concat("1"),a=["/(.+)"].map(function(e){var t=function(e){var t=arguments.length>1&&void 0!==arguments[1]?arguments[1]:self.location;return decodeURI(new URL(encodeURI(e),t).toString())}(e);return new RegExp("^".concat(t,"$"))});self.addEventListener("fetch",function(e){var t=e.request;"GET"===t.method&&/^https?/.test(t.url)&&c(t.url,a)&&e.respondWith(caches.open(s).then(function(n){return fetch(t).then(function(e){return n.put(t,e.clone()),e}).catch(function(){return caches.match(e.request)})}))}),self.addEventListener("activate",function(t){t.waitUntil(e("esw-cache-fallback",s))});var r=[],i=[];self.INDEX_FILE_HASH="744baf9d949d4e83451495541feeb223";var o="".concat("esw-index","-").concat("1"),u=new URL("index.html",self.location).toString();self.addEventListener("install",function(e){e.waitUntil(fetch(u,{credentials:"include"}).then(function(e){return caches.open(o).then(function(t){return t.put(u,e)})}))}),self.addEventListener("activate",function(t){t.waitUntil(e("esw-index",o))}),self.addEventListener("fetch",function(e){var t=e.request,n=new URL(t.url),s="GET"===t.method,a=-1!==t.headers.get("accept").indexOf("text/html"),f=n.origin===location.origin,h=c(t.url,r),d=!i.length||c(t.url,i);!("/tests"===n.pathname&&!1)&&s&&a&&f&&d&&!h&&e.respondWith(caches.match(u,{cacheName:o}).then(function(e){return e||fetch(u,{credentials:"include"}).then(function(e){return caches.open(o).then(function(t){return t.put(u,e)}),e.clone()})}))})}();
-//# sourceMappingURL=sw-a98ddaae41f67fa3f5218c48dc43d194.map
+(function () {
+  'use strict';
+
+  const VERSION = '1571024956145|0.48119337193143963';
+  self.CACHE_BUSTER = VERSION;
+  self.addEventListener('install', function installEventListenerCallback(event) {
+    return self.skipWaiting();
+  });
+  self.addEventListener('activate', function installEventListenerCallback(event) {
+    return self.clients.claim();
+  });
+
+  const FILES = ['assets/article-ember.css', 'assets/article-ember.js', 'assets/article-ember.map', 'assets/auto-import-fastboot.js', 'assets/chunk.0ae5c57672b390bac381.js', 'assets/chunk.6150ea19e0fc50bd532f.js', 'assets/chunk.7b8945e8bc70ba7e3fff.js', 'assets/chunk.7f3e62d16ee36fc0e92a.js', 'assets/chunk.8b31bcdf59184cd45d35.js', 'assets/chunk.9ebb237fb5b80190767c.js', 'assets/chunk.bd161eef7bba979cf7c3.js', 'assets/chunk.c2f4912f319e28154646.js', 'assets/chunk.e06a7603ebfe16cc6d04.js', 'assets/chunk.e93713239833c7c49f9f.js', 'assets/test-support.css', 'assets/test-support.js', 'assets/test-support.map', 'assets/tests.js', 'assets/tests.map', 'assets/vendor.css', 'assets/vendor.js', 'assets/vendor.map'];
+  const PREPEND = undefined;
+  const VERSION$1 = '1';
+  const REQUEST_MODE = 'cors';
+  const LENIENT_ERRORS = false;
+
+  /*
+   * Deletes all caches that start with the `prefix`, except for the
+   * cache defined by `currentCache`
+   */
+  var cleanupCaches = ((prefix, currentCache) => {
+    return caches.keys().then(cacheNames => {
+      cacheNames.forEach(cacheName => {
+        let isOwnCache = cacheName.indexOf(prefix) === 0;
+        let isNotCurrentCache = cacheName !== currentCache;
+
+        if (isOwnCache && isNotCurrentCache) {
+          caches.delete(cacheName);
+        }
+      });
+    });
+  });
+
+  const CACHE_KEY_PREFIX = 'esw-asset-cache';
+  const CACHE_NAME = "".concat(CACHE_KEY_PREFIX, "-").concat(VERSION$1);
+  const CACHE_URLS = FILES.map(file => {
+    return new URL(file, PREPEND || self.location).toString();
+  });
+  /*
+   * Removes all cached requests from the cache that aren't in the `CACHE_URLS`
+   * list.
+   */
+
+  const PRUNE_CURRENT_CACHE = () => {
+    caches.open(CACHE_NAME).then(cache => {
+      return cache.keys().then(keys => {
+        keys.forEach(request => {
+          if (CACHE_URLS.indexOf(request.url) === -1) {
+            cache.delete(request);
+          }
+        });
+      });
+    });
+  };
+
+  self.addEventListener('install', event => {
+    event.waitUntil(caches.open(CACHE_NAME).then(cache => {
+      return Promise.all(CACHE_URLS.map(url => {
+        let request = new Request(url, {
+          mode: REQUEST_MODE
+        });
+        return fetch(request).then(response => {
+          if (response.status >= 400) {
+            let error = new Error("Request for ".concat(url, " failed with status ").concat(response.statusText));
+
+            if (LENIENT_ERRORS) {
+              console.warn("Not caching ".concat(url, " due to ").concat(error));
+              return;
+            } else {
+              throw error;
+            }
+          }
+
+          return cache.put(url, response);
+        }).catch(function (error) {
+          console.error("Not caching ".concat(url, " due to ").concat(error));
+        });
+      }));
+    }));
+  });
+  self.addEventListener('activate', event => {
+    event.waitUntil(Promise.all([cleanupCaches(CACHE_KEY_PREFIX, CACHE_NAME), PRUNE_CURRENT_CACHE()]));
+  });
+  self.addEventListener('fetch', event => {
+    let isGETRequest = event.request.method === 'GET';
+    let shouldRespond = CACHE_URLS.indexOf(event.request.url) !== -1;
+
+    if (isGETRequest && shouldRespond) {
+      event.respondWith(caches.match(event.request, {
+        cacheName: CACHE_NAME
+      }).then(response => {
+        if (response) {
+          return response;
+        }
+
+        return fetch(event.request.url, {
+          mode: REQUEST_MODE
+        });
+      }));
+    }
+  });
+
+  const VERSION$2 = '1';
+  const PATTERNS = ['/(.+)'];
+
+  /**
+   * Create an absolute URL, allowing regex expressions to pass
+   *
+   * @param {string} url
+   * @param {string|object} baseUrl
+   * @public
+   */
+  function createNormalizedUrl(url, baseUrl = self.location) {
+    return decodeURI(new URL(encodeURI(url), baseUrl).toString());
+  }
+  /**
+   * Create an (absolute) URL Regex from a given string
+   *
+   * @param {string} url
+   * @returns {RegExp}
+   * @public
+   */
+
+  function createUrlRegEx(url) {
+    let normalized = createNormalizedUrl(url);
+    return new RegExp("^".concat(normalized, "$"));
+  }
+  /**
+   * Check if given URL matches any pattern
+   *
+   * @param {string} url
+   * @param {array} patterns
+   * @returns {boolean}
+   * @public
+   */
+
+  function urlMatchesAnyPattern(url, patterns) {
+    return !!patterns.find(pattern => pattern.test(decodeURI(url)));
+  }
+
+  const CACHE_KEY_PREFIX$1 = 'esw-cache-fallback';
+  const CACHE_NAME$1 = "".concat(CACHE_KEY_PREFIX$1, "-").concat(VERSION$2);
+  const PATTERN_REGEX = PATTERNS.map(createUrlRegEx);
+  self.addEventListener('fetch', event => {
+    let request = event.request;
+
+    if (request.method !== 'GET' || !/^https?/.test(request.url)) {
+      return;
+    }
+
+    if (urlMatchesAnyPattern(request.url, PATTERN_REGEX)) {
+      event.respondWith(caches.open(CACHE_NAME$1).then(cache => {
+        return fetch(request).then(response => {
+          cache.put(request, response.clone());
+          return response;
+        }).catch(() => caches.match(event.request));
+      }));
+    }
+  });
+  self.addEventListener('activate', event => {
+    event.waitUntil(cleanupCaches(CACHE_KEY_PREFIX$1, CACHE_NAME$1));
+  });
+
+  const ENVIRONMENT = 'development';
+  const VERSION$3 = '1';
+  const INDEX_HTML_PATH = 'index.html';
+  const INDEX_EXCLUDE_SCOPE = [];
+  const INDEX_INCLUDE_SCOPE = [];
+  self.INDEX_FILE_HASH = '6b8ff654edbba591ab862ff7510b1264';
+
+  const CACHE_KEY_PREFIX$2 = 'esw-index';
+  const CACHE_NAME$2 = "".concat(CACHE_KEY_PREFIX$2, "-").concat(VERSION$3);
+  const INDEX_HTML_URL = new URL(INDEX_HTML_PATH, self.location).toString();
+  self.addEventListener('install', event => {
+    event.waitUntil(fetch(INDEX_HTML_URL, {
+      credentials: 'include'
+    }).then(response => {
+      return caches.open(CACHE_NAME$2).then(cache => cache.put(INDEX_HTML_URL, response));
+    }));
+  });
+  self.addEventListener('activate', event => {
+    event.waitUntil(cleanupCaches(CACHE_KEY_PREFIX$2, CACHE_NAME$2));
+  });
+  self.addEventListener('fetch', event => {
+    let request = event.request;
+    let url = new URL(request.url);
+    let isGETRequest = request.method === 'GET';
+    let isHTMLRequest = request.headers.get('accept').indexOf('text/html') !== -1;
+    let isLocal = url.origin === location.origin;
+    let scopeExcluded = urlMatchesAnyPattern(request.url, INDEX_EXCLUDE_SCOPE);
+    let scopeIncluded = !INDEX_INCLUDE_SCOPE.length || urlMatchesAnyPattern(request.url, INDEX_INCLUDE_SCOPE);
+    let isTests = url.pathname === '/tests' && ENVIRONMENT === 'development';
+
+    if (!isTests && isGETRequest && isHTMLRequest && isLocal && scopeIncluded && !scopeExcluded) {
+      event.respondWith(caches.match(INDEX_HTML_URL, {
+        cacheName: CACHE_NAME$2
+      }).then(response => {
+        if (response) {
+          return response;
+        } // Re-fetch the resource in the event that the cache had been cleared
+        // (mostly an issue with Safari 11.1 where clearing the cache causes
+        // the browser to throw a non-descriptive blank error page).
+
+
+        return fetch(INDEX_HTML_URL, {
+          credentials: 'include'
+        }).then(fetchedResponse => {
+          caches.open(CACHE_NAME$2).then(cache => cache.put(INDEX_HTML_URL, fetchedResponse));
+          return fetchedResponse.clone();
+        });
+      }));
+    }
+  });
+
+}());
