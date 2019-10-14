@@ -8,11 +8,14 @@ e.default=i}),define("article-ember/authenticators/firebase",["exports","emberfi
 var t=Ember.Component.extend({actions:{moveUp:function(e){console.info(e.data())}}})
 e.default=t}),define("article-ember/components/write",["exports"],function(e){Object.defineProperty(e,"__esModule",{value:!0}),e.default=void 0
 var t=Ember.Component.extend({submit:function(e){var t=e.target.firstElementChild
-this.create(t.value),t.value="",e.preventDefault()}})
+this.create(t.value,this.sentence.sortOrder),t.value="",e.preventDefault()}})
 e.default=t}),define("article-ember/controllers/sentence",["exports"],function(e){Object.defineProperty(e,"__esModule",{value:!0}),e.default=void 0
-var t=Ember.Controller.extend({actions:{createNew:function(e){this.store.createRecord("sentence",{body:e}).save(),this.transitionToRoute("/sentences")}}})
+var t=Ember.Controller.extend({actions:{createNew:function(e,t){var r=this
+console.info("controller claimingSortOrder",t)
+var n={query:function(e){return e.orderBy("sortOrder").startAt(parseInt(t,10))}}
+this.store.query("sentence",n).then(function(n){n.forEach(function(e){e.incrementProperty("sortOrder"),e.save()}),r.store.createRecord("sentence",{body:e,sortOrder:t}).save(),r.transitionToRoute("/sentences")})}}})
 e.default=t}),define("article-ember/controllers/sentences",["exports"],function(e){Object.defineProperty(e,"__esModule",{value:!0}),e.default=void 0
-var t=Ember.Controller.extend({actions:{newHereAbove:function(e){this.transitionToRoute("/sentence/"+e.get("id"))}}})
+var t=Ember.Controller.extend({actions:{new:function(e){this.transitionToRoute("/sentence/"+e)}}})
 e.default=t}),define("article-ember/helpers/app-version",["exports","article-ember/config/environment","ember-cli-app-version/utils/regexp"],function(e,t,r){function n(e){var n=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{},a=t.default.APP.version,i=n.versionOnly||n.hideSha,o=n.shaOnly||n.hideVersion,l=null
 return i&&(n.showExtended&&(l=a.match(r.versionExtendedRegExp)),l||(l=a.match(r.versionRegExp))),o&&(l=a.match(r.shaRegExp)),l?l[0]:a}Object.defineProperty(e,"__esModule",{value:!0}),e.appVersion=n,e.default=void 0
 var a=Ember.Helper.helper(n)
@@ -39,20 +42,19 @@ var n={name:"export-application-global",initialize:r}
 e.default=n}),define("article-ember/instance-initializers/ember-data",["exports","ember-data/initialize-store-service"],function(e,t){Object.defineProperty(e,"__esModule",{value:!0}),e.default=void 0
 var r={name:"ember-data",initialize:t.default}
 e.default=r}),define("article-ember/models/sentence",["exports","ember-data"],function(e,t){Object.defineProperty(e,"__esModule",{value:!0}),e.default=void 0
-var r=t.default.Model,n=t.default.attr,a=r.extend({body:n("string")})
+var r=t.default.Model,n=t.default.attr,a=r.extend({body:n("string"),sortOrder:n("number")})
 e.default=a}),define("article-ember/resolver",["exports","ember-resolver"],function(e,t){Object.defineProperty(e,"__esModule",{value:!0}),e.default=void 0
 var r=t.default
 e.default=r}),define("article-ember/router",["exports","article-ember/config/environment"],function(e,t){Object.defineProperty(e,"__esModule",{value:!0}),e.default=void 0
 var r=Ember.Router.extend({location:t.default.locationType,rootURL:t.default.rootURL})
-r.map(function(){this.route("sentences"),this.route("sentence",{path:"/sentence/:sentence_id"})})
+r.map(function(){this.route("sentences"),this.route("sentence",{path:"/sentence/:sort_order"})})
 var n=r
 e.default=n}),define("article-ember/routes/index",["exports"],function(e){Object.defineProperty(e,"__esModule",{value:!0}),e.default=void 0
-var t=Ember.Route.extend({controllerName:"sentence",model:function(){return this.store.createRecord("sentence")}})
+var t=Ember.Route.extend({controllerName:"sentence",model:function(){return this.store.createRecord("sentence",{sortOrder:0})}})
 e.default=t}),define("article-ember/routes/sentence",["exports"],function(e){Object.defineProperty(e,"__esModule",{value:!0}),e.default=void 0
-var t=Ember.Route.extend({model:function(e){var t=this.store.getReference("sentence",e.sentence_id)
-return null==t.value()?this.store.createRecord("sentence"):t.load()}})
+var t=Ember.Route.extend({model:function(e){return this.store.createRecord("sentence",{sortOrder:e.sort_order})}})
 e.default=t}),define("article-ember/routes/sentences",["exports"],function(e){Object.defineProperty(e,"__esModule",{value:!0}),e.default=void 0
-var t=Ember.Route.extend({model:function(){return this.store.findAll("sentence")}})
+var t=Ember.Route.extend({model:function(){return this.store.query("sentence",{orderBy:{sortOrder:"asc"}})}})
 e.default=t}),define("article-ember/services/firebase-app",["exports","emberfire/services/firebase-app"],function(e,t){Object.defineProperty(e,"__esModule",{value:!0}),Object.defineProperty(e,"default",{enumerable:!0,get:function(){return t.default}})}),define("article-ember/services/firebase",["exports","emberfire/services/firebase"],function(e,t){Object.defineProperty(e,"__esModule",{value:!0}),Object.defineProperty(e,"default",{enumerable:!0,get:function(){return t.default}})}),define("article-ember/templates/application",["exports"],function(e){Object.defineProperty(e,"__esModule",{value:!0}),e.default=void 0
 var t=Ember.HTMLBars.template({id:"1krNnXG0",block:'{"symbols":[],"statements":[[7,"p",true],[10,"id","notice"],[8],[0,"@notice"],[9],[0,"\\n\\n"],[1,[22,"outlet"],false],[0,"\\n"]],"hasEval":false}',meta:{moduleName:"article-ember/templates/application.hbs"}})
 e.default=t}),define("article-ember/templates/components/write",["exports"],function(e){Object.defineProperty(e,"__esModule",{value:!0}),e.default=void 0
@@ -62,7 +64,7 @@ var t=Ember.HTMLBars.template({id:"KhxEB2Gd",block:'{"symbols":[],"statements":[
 e.default=t}),define("article-ember/templates/sentence",["exports"],function(e){Object.defineProperty(e,"__esModule",{value:!0}),e.default=void 0
 var t=Ember.HTMLBars.template({id:"mOqHYbAm",block:'{"symbols":[],"statements":[[7,"h1",true],[8],[1,[23,0,["model","body"]],false],[9],[0,"\\n\\n"],[5,"write",[],[["@sentence","@create"],[[23,0,["model"]],[28,"action",[[23,0,[]],"createNew"],null]]]],[0,"\\n"]],"hasEval":false}',meta:{moduleName:"article-ember/templates/sentence.hbs"}})
 e.default=t}),define("article-ember/templates/sentences",["exports"],function(e){Object.defineProperty(e,"__esModule",{value:!0}),e.default=void 0
-var t=Ember.HTMLBars.template({id:"m0AfNWJk",block:'{"symbols":["sentence"],"statements":[[7,"div",true],[8],[0,"\\n  "],[7,"h1",true],[8],[0,"Home"],[9],[0,"\\n"],[9],[0,"\\n\\n"],[7,"table",true],[8],[0,"\\n  "],[7,"tbody",true],[8],[0,"\\n"],[4,"each",[[23,0,["model"]]],null,{"statements":[[0,"      "],[7,"tr",true],[8],[0,"\\n        "],[7,"td",true],[8],[0,"\\n          "],[7,"button",false],[3,"action",[[23,0,[]],"newHereAbove",[23,1,[]]]],[8],[0,"+"],[9],[0,"\\n        "],[9],[0,"\\n      "],[9],[0,"\\n      "],[7,"tr",true],[8],[0,"\\n        "],[7,"td",true],[8],[0,"\\n          "],[1,[23,1,["body"]],false],[0,"\\n        "],[9],[0,"\\n        "],[7,"td",true],[8],[0,"\\n          "],[7,"button",false],[3,"action",[[23,0,[]],"edit",[23,1,[]]]],[8],[0,"edit"],[9],[0,"\\n          "],[7,"button",false],[3,"action",[[23,0,[]],"delete",[23,1,[]]]],[8],[0,"x"],[9],[0,"\\n        "],[9],[0,"\\n      "],[9],[0,"\\n"]],"parameters":[1]},null],[0,"    "],[7,"tr",true],[8],[0,"\\n      "],[7,"td",true],[8],[0,"\\n        "],[7,"button",false],[3,"action",[[23,0,[]],"newBottom"]],[8],[0,"+"],[9],[0,"\\n      "],[9],[0,"\\n    "],[9],[0,"\\n  "],[9],[0,"\\n"],[9],[0,"\\n"]],"hasEval":false}',meta:{moduleName:"article-ember/templates/sentences.hbs"}})
+var t=Ember.HTMLBars.template({id:"++smbJ24",block:'{"symbols":["sentence","i"],"statements":[[7,"div",true],[8],[0,"\\n  "],[7,"h1",true],[8],[0,"Home"],[9],[0,"\\n"],[9],[0,"\\n\\n"],[7,"table",true],[8],[0,"\\n  "],[7,"tbody",true],[8],[0,"\\n"],[4,"each",[[23,0,["model"]]],null,{"statements":[[0,"      "],[7,"tr",true],[8],[0,"\\n        "],[7,"td",true],[8],[0,"\\n          "],[7,"button",false],[3,"action",[[23,0,[]],"new",[23,1,["sortOrder"]]]],[8],[0,"+"],[9],[0,"\\n        "],[9],[0,"\\n      "],[9],[0,"\\n      "],[7,"tr",true],[8],[0,"\\n        "],[7,"td",true],[8],[0,"\\n          "],[1,[23,1,["body"]],false],[0,"\\n        "],[9],[0,"\\n        "],[7,"td",true],[8],[0,"\\n          "],[7,"button",false],[3,"action",[[23,0,[]],"edit",[23,1,[]]]],[8],[0,"edit"],[9],[0,"\\n          "],[7,"button",false],[3,"action",[[23,0,[]],"delete",[23,1,[]]]],[8],[0,"x"],[9],[0,"\\n        "],[9],[0,"\\n      "],[9],[0,"\\n"]],"parameters":[1,2]},null],[0,"    "],[7,"tr",true],[8],[0,"\\n      "],[7,"td",true],[8],[0,"\\n        "],[7,"button",false],[3,"action",[[23,0,[]],"newBottom"]],[8],[0,"+"],[9],[0,"\\n      "],[9],[0,"\\n    "],[9],[0,"\\n  "],[9],[0,"\\n"],[9],[0,"\\n"]],"hasEval":false}',meta:{moduleName:"article-ember/templates/sentences.hbs"}})
 e.default=t})
 define("article-ember/config/environment",[],function(){try{var e="article-ember/config/environment",t=document.querySelector('meta[name="'+e+'"]').getAttribute("content"),r={default:JSON.parse(decodeURIComponent(t))}
-return Object.defineProperty(r,"__esModule",{value:!0}),r}catch(n){throw new Error('Could not read config from meta tag with name "'+e+'".')}}),runningTests||require("article-ember/app").default.create({name:"article-ember",version:"0.0.0+d5f2b819"})
+return Object.defineProperty(r,"__esModule",{value:!0}),r}catch(n){throw new Error('Could not read config from meta tag with name "'+e+'".')}}),runningTests||require("article-ember/app").default.create({name:"article-ember",version:"0.0.0+1b00144a"})
